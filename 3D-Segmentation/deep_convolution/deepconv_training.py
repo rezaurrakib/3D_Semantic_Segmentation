@@ -25,13 +25,13 @@ _status_ = "Dev"
 
 def _arg_parsing():
     parser = argparse.ArgumentParser("SegmentationModel")
-    parser.add_argument('--model', type=str, default='pointnet', help='Load model for training [default: pointnet]')
+    parser.add_argument('--model', type=str, default='deep_convolution', help='Load model for training [default: deep_convolution]')
     parser.add_argument('--batchsize', type=int, default=32, help='Batch size definition')
     parser.add_argument('--epoch', type=int, default=1, help='Number of epochs for training')
     parser.add_argument('--output', type=str, default='', help='Output folder to save model')
     parser.add_argument('--gpu', type=str, default='0', help='GPU to use [default: GPU 0]')
     parser.add_argument('--npoint', type=int, default=128, help='Point Number [default: 256]')
-    parser.add_argument('--log_dir', type=str, default='s3dis_log', help='Log path [default: None]')
+    parser.add_argument('--log_dir', type=str, default=None, help='Log path [default: None]')
     parser.add_argument('--test_area', type=int, default=5, help='S3DIS area to use for test, option: 1-6 [default: 5]')
     parser.add_argument('--optimizer', type=str, default='Adam', help='Adam or SGD [default: Adam]')
     parser.add_argument('--learning_rate', default=0.001, type=float, help='Initial learning rate [default: 0.001]')
@@ -80,7 +80,7 @@ class SemanticSegTraining():
         self.experiment_dir = Path('/home/reza/Desktop/thesis_tum/nn_training_stuffs/log_directory')
         print("Experimental Dir: ", self.experiment_dir)
         self.experiment_dir.mkdir(exist_ok=True)
-        self.experiment_dir = self.experiment_dir.joinpath('semantic_segmentation')
+        self.experiment_dir = self.experiment_dir.joinpath('deep_convolution')
         self.experiment_dir.mkdir(exist_ok=True)
         if self.parser_obj.log_dir is None:
             self.experiment_dir = self.experiment_dir.joinpath(time_str)
@@ -113,14 +113,15 @@ class SemanticSegTraining():
             self.seg_label_to_categry[idx] = cat
 
     def load_model_for_training(self):
-        model = importlib.import_module('.semantic_seg_network', package=self.parser_obj.model)
-        classifier = model.ModelCreation(self.num_class).cuda()
+        model = importlib.import_module('.deep_conv_network', package=self.parser_obj.model)
+        classifier = model.DeepConv(self.num_class).cuda()
         #print("in load_model --> classifier.channel: ", classifier.chn)
         classifier_loss = model.GetLoss().cuda()
         return classifier, classifier_loss
 
     def weight_initialization(self, m):
         classname = m.__class__.__name__
+        print("m: ", m)
         if classname.find('Conv2d') != -1:
             torch.nn.init.xavier_normal_(m.weight.data)
             torch.nn.init.constant_(m.bias.data, 0.0)
@@ -130,7 +131,7 @@ class SemanticSegTraining():
 
     def start_training(self):
         self.root = self.s3dis_dataset_path
-        print('Loading S3DIS Training Data .................. ')
+        print('Loading S3DIS Training Data for Deep Convolution Training .................. ')
 
         # Load train data ...
         train_dataset = S3DISDataset(split='train', data_root=self.root, num_point=self.num_points,
@@ -209,10 +210,12 @@ class SemanticSegTraining():
                 print("coord points shape: ", coord_points.size())
                 coord_points = coord_points.float().cuda()
                 labels = labels.long().cuda()
+
                 coord_points = coord_points.transpose(2, 1)
                 optimizer.zero_grad()
                 classifier = classifier.train()
                 #print("in start_training() --> classifier.chn: ", classifier.chn)
+                print("[Seg Training] Point Coord Shape: ", coord_points.shape)
                 seg_pred, trans_feat = classifier(coord_points)
                 print("seg_pred.shape(): ", seg_pred.size())
                 print("trans_feat.shape(): ", trans_feat.size())

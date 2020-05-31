@@ -34,8 +34,8 @@ Date: Nov 2019
 """
 import argparse
 import os
-from dataset_processing.s3dis_preprocess import ScannetDatasetWholeScene
-from dataset_processing.indoor3d_utils import g_label2color
+from s3dis_data_processing.s3dis_preprocess import ScannetDatasetWholeScene
+from s3dis_data_processing.indoor3d_utils import g_label2color
 import torch
 import logging
 from pathlib import Path

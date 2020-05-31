@@ -4,3 +4,4 @@ A comprehensive overview of semantic segmentation approaches using 3D deep learn
 
 ### Commit History
   - **[28.05.2020]** Initial commit with PointNet implementation on S3DIS dataset in PyTorch.
+  - **[30.05.2020]** Add Deep Convolution Net implementation in PyTorch, Semantic3D dataset pre-processing. 

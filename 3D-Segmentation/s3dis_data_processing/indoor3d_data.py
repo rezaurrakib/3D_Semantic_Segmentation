@@ -1,6 +1,6 @@
 import os
 import sys
-from dataset_processing.indoor3d_utils import DATA_PATH, collect_point_label
+from s3dis_data_processing.indoor3d_utils import DATA_PATH, collect_point_label
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #ROOT_DIR = os.path.dirname(BASE_DIR)

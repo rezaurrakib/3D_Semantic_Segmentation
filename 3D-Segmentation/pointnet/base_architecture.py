@@ -31,7 +31,7 @@ class InputTransNet(nn.Module):
 
     def forward(self, inp):
         batch_size = inp.size()[0]
-        print("InputTransNet --> inp.size(): ", inp.size())
+        print("InputTransNet --> inp.size(): ", inp.size()) # 32 x 9 x 128
         inp = torch_func.relu(self.bn1(self.conv1(inp)))
         inp = torch_func.relu(self.bn2(self.conv2(inp)))
         inp = torch_func.relu(self.bn3(self.conv3(inp)))
@@ -47,7 +47,7 @@ class InputTransNet(nn.Module):
             identity_mat = identity_mat.cuda()
         inp = inp + identity_mat
         inp = inp.view(-1, 3, 3)
-        print("InputTransNet --> inp.size() after op: ", inp.size())
+        print("InputTransNet --> inp.size() after op: ", inp.size()) # 32 x 3 x 3
 
         return inp
 
@@ -132,30 +132,30 @@ class PointNetBaseArchitecture(nn.Module):
 
     def forward(self, inp_data):
         batch, dim, N = inp_data.size() # default: 32 x 9 x 4096
-        #print("In PointNetBaseArchitecture --> batch: ", batch, " dimension: ", dim, " N: ", N)
+        print("In PointNetBaseArchitecture --> batch: ", batch, " dimension: ", dim, " N: ", N)
         trans = self.inp_transformation(inp_data)
-        #print("trans.size()  : ", trans.size())
+        print("trans.size()  : ", trans.size())
         inp_data = inp_data.transpose(2, 1)
-        #print("ist inp_data  : ", inp_data.size())
+        print("ist inp_data  : ", inp_data.size())
         if dim > 3:
             inp_data, feature, _ = inp_data.split(3, dim=2)
-        #print("feature size: ", feature.size())
+        print("feature size: ", feature.size())
         inp_data = torch.bmm(inp_data, trans)
-        #print("bmm er pore : ", inp_data.size())
+        print("bmm er pore : ", inp_data.size())
         if dim > 3:
             inp_data = torch.cat([inp_data, feature], dim=2)
         inp_data = inp_data.transpose(2, 1)
         #print("Bari khawar age : ", inp_data.size())
-        inp_data = torch_func.relu(self.bn1(self.conv1(inp_data)))
+        inp_data = torch_func.relu(self.bn1(self.conv1(inp_data))) # 32 x 64 x 128
 
         if self.feature_transform:
             trans_feat = self.seg_feat_transformation(inp_data)
-            #print("trans_feat.size(): ", trans_feat.size())
+            print("trans_feat.size(): ", trans_feat.size()) # 32 x 64 x 64
             inp_data = inp_data.transpose(2, 1)
-            #print("feat-trans --> inp_data: ", inp_data.size())
+            print("feat-trans --> inp_data: ", inp_data.size())
             inp_data = torch.bmm(inp_data, trans_feat)
             inp_data = inp_data.transpose(2, 1)
-            print("feature transform --> inp:", inp_data.size())
+            print("feature transform --> inp:", inp_data.size()) # 32 x 64 x 128
         else:
             trans_feat = None
 

@@ -32,6 +32,7 @@ class S3DISDataset(Dataset):
             points, labels = room_data[:, 0:6], room_data[:, 6]  # xyzrgb, N*6; l, N
             tmp, _ = np.histogram(labels, range(14))
             labelweights += tmp
+            #print("tmp: ", tmp)
             coord_min, coord_max = np.amin(points, axis=0)[:3], np.amax(points, axis=0)[:3]
             self.room_points.append(points), self.room_labels.append(labels)
             self.room_coord_min.append(coord_min), self.room_coord_max.append(coord_max)
