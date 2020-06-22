@@ -1,4 +1,4 @@
-# Semantic Segmentation Using 3D Deep Learning
+# Point Cloud Analysis : 3D Semantic Segmentation and Reconstruction
 
 A comprehensive overview of semantic segmentation approaches using 3D deep learning techniques. Some state-of-the-art methods and its variants have been discussed and implemented.
 
